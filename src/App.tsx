@@ -1,25 +1,59 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useState } from "react";
+import Form from "./components/from/Form";
+import Table from "./components/table/Table";
+import TableBody from "./components/tableBody/TableBody";
+
+interface Data {
+  firstName: String;
+  lastName: String;
+  email: String;
+  eventDate: Date;
+}
 
 function App() {
+  const [data, setData] = useState<Array<Data>>([]);
+  const [uptade, setUptade] = useState<Boolean>(false);
+
+  const uptadeEvents = () => {
+    setUptade(!uptade);
+  };
+
+  //    === GET ALL EVENTS FROM DATABASE ===
+  useEffect(() => {
+    fetch("http://localhost:5000/event")
+      .then((response) => response.json())
+      .then((data) => {
+        setData(data.reverse());
+      });
+  }, []);
+
+  //    === UPTADE ALL EVENTS FROM DATABASE ===
+  useEffect(() => {
+    fetch("http://localhost:5000/event")
+      .then((response) => response.json())
+      .then((data) => setData(data.reverse()));
+  }, [uptade]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <main>
+      <Form uptade={uptadeEvents} />
+      <Table>
+        {data === [] ? (
+          <h2>Loading...</h2>
+        ) : (
+          data.map(({ firstName, lastName, email, eventDate }: Data) => {
+            return (
+              <TableBody
+                firstName={firstName}
+                lastName={lastName}
+                email={email}
+                eventDate={eventDate}
+              />
+            );
+          })
+        )}
+      </Table>
+    </main>
   );
 }
 
